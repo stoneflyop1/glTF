@@ -1,1 +1,5 @@
 **/output
+
+
+# ignore vs code debug file
+*.test

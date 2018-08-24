@@ -1,35 +1,34 @@
 package obj2gltf
 
 import (
-	"io"
-	"io/ioutil"
 	"bufio"
 	"bytes"
-	"strings"
-	"strconv"
-	"math"
 	"encoding/binary"
-	"time"
+	"io"
+	"io/ioutil"
+	"math"
 	"math/rand"
+	"strconv"
+	"strings"
+	"time"
 )
 
 const (
 	WS = byte(' ')
-	T = '\t'
+	T  = '\t'
 	BS = 64 // bitSize for strconv.Parse
 )
+
 //[0, 1, 2, 0, 2, 3, 0, 4, 5, 0, 5, 1, 3, 4, 0, 1, 5, 6, 1, 6, 2, 2, 6, 7, 2, 7, 3, 3, 7, 4, 5, 4, 7, 5, 7, 6]
 //[1, 2, 3, 1, 3, 4, 1, 5, 6, 1, 6, 2, 3, 7, 8, 3, 8, 4, 4, 8, 5, 4, 5, 1, 2, 6, 7, 2, 7, 3, 6, 5, 8, 6, 8, 7]
 //
 //[-0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5]
 //[-0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5]
 
-
-
 var (
-	WSS = []byte{' '} // whitespace separator
-	WT = []byte{'\t'} // table separator
-	SL = []byte{'/'} // table separator
+	WSS = []byte{' '}  // whitespace separator
+	WT  = []byte{'\t'} // table separator
+	SL  = []byte{'/'}  // table separator
 )
 
 func isSpace(b byte) bool {
@@ -43,8 +42,8 @@ type Obj struct {
 	Fc, Vc    int
 }
 
-func SturfeeParser (r io.Reader) []Obj {
-	file, _ := ioutil.TempFile("", "testCube.bin")
+func SturfeeParser(r io.Reader) []Obj {
+	//file, _ := ioutil.TempFile("", "testCube.bin")
 	scanner := bufio.NewScanner(r)
 	scanner.Split(bufio.ScanLines)
 	v := []float32{}
@@ -59,16 +58,16 @@ func SturfeeParser (r io.Reader) []Obj {
 		// empty
 		case len(token) == 0:
 		// vertices
-		case token[0] == 'v' && isSpace(token[1]) :
+		case token[0] == 'v' && isSpace(token[1]):
 			res := bytes.Split(token[2:], WSS)
 			v = append(v,
 				parseFloat32(string(res[0])),
 				parseFloat32(string(res[1])),
 				parseFloat32(string(res[2])),
 			)
-			obj.Vc +=3
+			obj.Vc += 3
 		// face
-		case token[0] == 'f' && isSpace(token[1]) :
+		case token[0] == 'f' && isSpace(token[1]):
 			res := bytes.Split(token[2:], WSS)
 			if len(res) < 3 {
 				continue
@@ -78,9 +77,9 @@ func SturfeeParser (r io.Reader) []Obj {
 				parseInt16(string(res[1])),
 				parseInt16(string(res[2])),
 			)
-			obj.Fc +=3
+			obj.Fc += 3
 
-		case token[0] == 'o' && isSpace(token[1]) :
+		case token[0] == 'o' && isSpace(token[1]):
 			if init {
 				init = false
 				obj.Name = string(token[2:])
@@ -96,7 +95,7 @@ func SturfeeParser (r io.Reader) []Obj {
 			v = []float32{}
 			f = []int16{}
 		//str := string(token[2:])
-			//println(str)
+		//println(str)
 		default:
 			//println(string(token))
 		}
@@ -105,34 +104,29 @@ func SturfeeParser (r io.Reader) []Obj {
 	if err := scanner.Err(); err != nil {
 		panic(err)
 	}
-			obj.Indices = f
-			obj.Positions = v
-			objs = append(objs, obj)
+	obj.Indices = f
+	obj.Positions = v
+	objs = append(objs, obj)
 
-			println(len(f))
-			println(len(v))
+	println(len(f))
+	println(len(v))
 
 	return objs
-	err := binary.Write(file, binary.LittleEndian, v)
-	if err != nil {
-		println(err.Error())
-	}
+	// err := binary.Write(file, binary.LittleEndian, v)
+	// if err != nil {
+	// 	println(err.Error())
+	// }
 
-	err = binary.Write(file, binary.LittleEndian, f)
-	if err != nil {
-		println(err.Error())
-	}
-	file.Close()
+	// err = binary.Write(file, binary.LittleEndian, f)
+	// if err != nil {
+	// 	println(err.Error())
+	// }
+	// file.Close()
 
-
-
-	return []Obj{}
+	// return []Obj{}
 }
 
-
-
 func Parse(r io.Reader) (int, error) {
-
 
 	file, _ := ioutil.TempFile("", "data.3d.bin")
 	BinWriter := binWriter{}
@@ -147,13 +141,13 @@ func Parse(r io.Reader) (int, error) {
 		// empty
 		case len(token) == 0:
 		// vertices
-		case token[0] == 'v' && isSpace(token[1]) :
+		case token[0] == 'v' && isSpace(token[1]):
 			BinWriter.handlT(token[2:], "v")
 		// normal
-		case token[0] == 'v' && token[1] == 'n' && isSpace(token[2]) :
+		case token[0] == 'v' && token[1] == 'n' && isSpace(token[2]):
 			BinWriter.handleP(token[3:])
 		// texcoord
-		case token[0] == 'v' && token[1] == 't' && isSpace(token[2]) :
+		case token[0] == 'v' && token[1] == 't' && isSpace(token[2]):
 			BinWriter.handleP(token[3:])
 
 		default:
@@ -172,8 +166,6 @@ func proceedFloat32(s string) []byte {
 	return Float32bytes(parseFloat32(s))
 }
 
-
-
 // alias for strconv.ParseFloat with exception
 func parseFloat32(s string) float32 {
 	f, err := strconv.ParseFloat(strings.Trim(s, " "), 32)
@@ -190,14 +182,14 @@ func Float32bytes(float float32) []byte {
 	return bytesBuf
 }
 
-func (w *binWriter) handleP (token []byte) {
+func (w *binWriter) handleP(token []byte) {
 	res := bytes.Split(token, WSS)
 	bytes_ := []byte{}
 	for _, r := range res {
 		bytes_ = append(bytes_, proceedFloat32(string(r))...)
 	}
 	if w.w.Available() < len(bytes_) {
-		 w.w.Flush()
+		w.w.Flush()
 	}
 	n, err := w.w.Write(bytes_)
 	if err != nil {
@@ -206,15 +198,14 @@ func (w *binWriter) handleP (token []byte) {
 	w.n += n
 }
 
-
 type binWriter struct {
-	w *bufio.Writer
-	n int
-	offset int
+	w          *bufio.Writer
+	n          int
+	offset     int
 	currentTag string
-	currentID string
-	ids []string
-	metadata map[string]meta
+	currentID  string
+	ids        []string
+	metadata   map[string]meta
 }
 
 type meta struct {
@@ -235,7 +226,7 @@ func RandStringRunes(n int) string {
 	return string(b)
 }
 
-func (BinWriter *binWriter)  handlT(token []byte, tag string) {
+func (BinWriter *binWriter) handlT(token []byte, tag string) {
 	if BinWriter.currentTag != tag {
 		if len(BinWriter.currentID) > 0 {
 			Meta := meta{BinWriter.n, BinWriter.offset}
